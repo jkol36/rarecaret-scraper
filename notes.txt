@@ -17,3 +17,29 @@ Possible Solutions:
   2. It might be possible to only use osmosis as a parsing library and abstract the fetching of the url away. But then again, if osmosis is supposed to 
     act like a browser than it makes sense it would do both. So this isn't really a problem to begin with. Osmosis probably needs to make the request because it 
     has logic that is more complex than just an http request, it mounts the javascript <script> tags it finds in the initial response
+
+So It turns out that my previous concerns are now mute. I dug deeper into how rare caret works and they do return json so no parsing of html is required. In fact, they actually query multiple sites on behalf of the user and return a collection of results from all the sites they have queried. The sites include:
+
+1. Yadav
+2. Allurez
+3. IDJewelery
+4. BrianGavin
+5. SolomonBrothers
+6. DiamondsDirect
+7. TaylorHart
+8. BrilliantlyEngaged
+9. WhiteFlash
+10. GoodOldGold
+11. Zales
+12. Ritani
+13. JamesAllen
+14. Kay
+15. Zoara
+16. Costco
+17. BlueNile
+18. HPDiamonds
+19. Jared
+20. UnionDiamond
+21. WonderJewelers
+
+

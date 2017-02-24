@@ -23,12 +23,39 @@ export const postUserQuery = () => {
 }
 
 const fetchResultsForQuery = (key) => {
-  console.log('fetcher results for query was called with', key)
-  return agent
-          .get(`https://www.rarecarat.com/${key}`)
-          .set(headers)
-          .then(res => res.text)
-          .catch(console.log)
+  const urls = [
+    `https://www.rarecarat.com/Home/GetYadav/${key}`,
+    `https://www.rarecarat.com/Home/GetAllurez/${key}`,
+    `https://www.rarecarat.com/Home/GetIDJewelry/${key}`,
+    `https://www.rarecarat.com/Home/GetBrianGavin/${key}`,
+    `https://www.rarecarat.com/Home/GetSolomonBrothers/${key}`,
+    `https://www.rarecarat.com/Home/GetDiamondsDirect/${key}`,
+    `https://www.rarecarat.com/Home/GetTaylorHart/${key}`,
+    `https://www.rarecarat.com/Home/GetBrilliantlyEngaged/${key}`,
+    `https://www.rarecarat.com/Home/GetWhiteflash/${key}`,
+    `https://www.rarecarat.com/Home/GetGoodOldGold/${key}`,
+    `https://www.rarecarat.com/Home/GetZales/${key}`,
+    `https://www.rarecarat.com/Home/GetRitani/${key}`,
+    `https://www.rarecarat.com/Home/GetJamesAllen/${key}`,
+    `https://www.rarecarat.com/Home/GetKay/${key}`,
+    `https://www.rarecarat.com/Home/GetZoara/${key}`,
+    `https://www.rarecarat.com/Home/GetCostco/${key}`,
+    `https://www.rarecarat.com/Home/GetBlueNile/${key}`,
+    `https://www.rarecarat.com/Home/GetHPDiamonds/${key}`,
+    `https://www.rarecarat.com/Home/GetJared/${key}`,
+    `https://www.rarecarat.com/Home/GetUnionDiamond/${key}`,
+    `https://www.rarecarat.com/Home/GetWonderJewelers/${key}`
+  ]
+  let promises = Promise.map(urls, url => {
+    return agent
+            .post(url)
+            .set(headers)
+            .then(res => {
+              return {...res.body, url}
+            })
+            .catch(err => err)
+  })
+  return Promise.all(promises)
 }
 export const getAllDiamondsAsHtml = () => {
   return postUserQuery()
