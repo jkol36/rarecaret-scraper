@@ -1,0 +1,19 @@
+Issues:
+  1. Cheerio isn't going to work in terms of being able to parse rarecaret because rarecaret is a Angular JS app. 
+  That means that a regular http request with superagent will just yield a skeleton html tree, when the real part of the html
+  tree is javascript injected at a later point in time. 
+
+  2. After doing initial research on osmosis i've found that osmosis is used as both a http library for making requests
+    and a parsing library for parsing the html when it is sent back. I wanted to seperate the parsing from the fetching if possible, 
+    mainly because osmosis is going to be put inside a function and a function is supposed to do just one thing. If it does to much and an error is thrown
+    in this case fetching a url and then parsing the html then its going to be harder to figure out which part of the business logic threw the error,
+    was it an error parsing or an error fetching?
+
+Possible Solutions:
+  1. Find a library that can wait for the javascript to load. A library that can query rarecaret as if it's a browser.
+    I think Osmosis can work like this, but it's been a while since i used it so need to play around with it and do some research
+    as well.
+
+  2. It might be possible to only use osmosis as a parsing library and abstract the fetching of the url away. But then again, if osmosis is supposed to 
+    act like a browser than it makes sense it would do both. So this isn't really a problem to begin with. Osmosis probably needs to make the request because it 
+    has logic that is more complex than just an http request, it mounts the javascript <script> tags it finds in the initial response
