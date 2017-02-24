@@ -19,6 +19,7 @@
     "babel-register": "^6.23.0",
     "bluebird": "^3.4.7",
     "mocha": "^3.2.0",
+    "osmosis": "^1.1.2",
     "superagent": "^3.5.0",
     "superagent-bluebird-promise": "^4.1.0"
   }
