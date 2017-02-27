@@ -11,3 +11,4 @@ export const initializeDatabase = () => {
 
 export const defaultCarat = 0.30
 export const caratIncrement = 0.01
+export const endCarat = 3.5

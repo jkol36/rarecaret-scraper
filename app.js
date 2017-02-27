@@ -1,4 +1,4 @@
-import {initializeDatabase} from './config'
+import {initializeDatabase, endCarat} from './config'
 import {
   getDiamondsFromRareCaret,
   postUserQuery,
@@ -81,7 +81,7 @@ const start = () => {
   let {carat, rareCaretDiamonds} = getState()
   console.log(rareCaretDiamonds.length)
   console.log(carat)
-  if(carat >= 3) {
+  if(carat >= endCarat) {
     console.log('finished fetching all diamonds from rarecaret')
     console.log(rareCaretDiamonds.length)
     return Promise.resolve('done')
