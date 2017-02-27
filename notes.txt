@@ -42,4 +42,7 @@ So It turns out that my previous concerns are now mute. I dug deeper into how ra
 20. UnionDiamond
 21. WonderJewelers
 
+2/27/17
+After talking to scott and Brett, it became clear that an initial search on rare caret with all filters set as leniently as possible was not returning back enough results. Specifically, rare caret was not sending back the number of diamonds they said they were. 
+
 

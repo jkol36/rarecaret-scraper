@@ -1,0 +1,2 @@
+require('./rareCaretDiamond')
+require('./carat')
