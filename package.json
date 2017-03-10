@@ -4,7 +4,7 @@
   "description": "Scraper for scraping diamonds off of rarecaret",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-register -t 20000",
+    "test": "mocha --compilers js:babel-register -t 40000",
     "start": "node index"
   },
   "repository": {
@@ -18,7 +18,6 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-register": "^6.23.0",
     "bluebird": "^3.4.7",
-    "csv2json": "^1.2.0",
     "dotenv": "^4.0.0",
     "firebase": "^3.6.10",
     "firebase-admin": "^4.1.1",
@@ -27,6 +26,7 @@
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
     "superagent": "^3.5.0",
-    "superagent-bluebird-promise": "^4.1.0"
+    "superagent-bluebird-promise": "^4.1.0",
+    "ya-csv": "^0.10.1"
   }
 }

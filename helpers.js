@@ -14,10 +14,10 @@ const headers = {
 
 const data = {
   "Index":0,
-  "PageSize":50,
+  "PageSize":100,
   "Sorting":"Price",
   "Order":"asc",
-  "Shapes":"CU,AS,RA,HS,OV,PR,EC,MQ,PS,RD",
+  "Shapes":"RD",
   "Price":{
     "Min":250,
     "Max":2000000
@@ -68,11 +68,13 @@ const data = {
   "RequestNumber":1
 }
 export const postUserQuery = (caret=0.15) => {
-  let filters = Object.assign({}, data, {Carat: {Min:caret}})
+  let filters = Object.assign({}, data, {Carats: {Min:caret, Max:caret}})
+  console.log(filters)
+
   return agent
           .post('https://www.rarecarat.com/Home/PostUserQuery')
           .set(headers)
-          .send(data)
+          .send(filters)
           .then(res => res.body.Data)
           .catch(err => err)
 }
@@ -105,7 +107,8 @@ export const fetchResultsForQuery = (key) => {
             .post(url)
             .set(headers)
             .then(res => {
-              return {...res.body, url}
+              let lengthOfDiamondArray = res.body.Data.diamonds.length
+              return {...res.body, url, lengthOfDiamondArray}
             })
             .catch(err => err)
   })
@@ -115,8 +118,6 @@ export const getAllDiamondsFromRareCaret = () => {
   return postUserQuery()
           .then(fetchResultsForQuery)
           .then(results => {
-            console.log('fetched diamonds from rare caret')
-            console.log(results.length)
             return results
           })
           .catch(err => err)

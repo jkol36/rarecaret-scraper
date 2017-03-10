@@ -24,4 +24,4 @@ caretSchema.statics.increment = function(newVal) {
           .then(res => res)
 }
 
-export default mongoose.model('caret', caretSchema)
+export default mongoose.model('carat', caretSchema)

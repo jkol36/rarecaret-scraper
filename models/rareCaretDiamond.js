@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 const rareCaretDiamondSchema = mongoose.Schema({
+  requestCarat: Number,
   Carat: Number,
   Cert: String,
   Clarity: String,
@@ -27,4 +28,4 @@ const rareCaretDiamondSchema = mongoose.Schema({
   Website: String
 })
 
-export default mongoose.model('rareCaretDiamond', rareCaretDiamondSchema)
+export default mongoose.model('rareCaratDiamond', rareCaretDiamondSchema)

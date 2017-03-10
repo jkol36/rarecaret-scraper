@@ -3,12 +3,12 @@ import { caratIncrement } from './config'
 import mongoose from 'mongoose'
 
 
-export const diamondsAddedRareCaret = (diamonds) => dispatch => {
+export const diamondsAddedRareCaret = (diamonds, carat) => dispatch => {
   return new Promise(resolve => {
     let promises = Promise.map(diamonds, diamond => {
       return mongoose
-              .model('rareCaretDiamond')
-              .create(diamond)
+              .model('rareCaratDiamond')
+              .create(Object.assign({}, diamond, {requestCarat:carat}))
               .then(res => res.save())
               .catch(err => err)
     })
@@ -23,20 +23,11 @@ export const diamondsAddedRareCaret = (diamonds) => dispatch => {
   })
 
 }
-export const diamondsAddedIdex = (diamonds) => dispatch => {
-  return new Promise(resolve => {
-    dispatch({
-      type: C.DIAMONDS_ADDED_IDEX,
-      diamonds
-    })
-    resolve(diamonds)
-  })
 
-}
 
 export const caratChanged = (carat) => dispatch => {
   return new Promise(resolve => {
-    mongoose.model('caret')
+    mongoose.model('carat')
       .increment(caratIncrement)
       .then(res => {
         console.log(res)
@@ -44,7 +35,7 @@ export const caratChanged = (carat) => dispatch => {
         type: C.CARAT_CHANGED,
         carat: res.carat
         })
-        resolve(res.caret)
+        resolve(res.carat)
       })
   })
 }

@@ -1,17 +1,28 @@
 import { expect } from 'chai'
 import {
-  getAllDiamonds
+  postUserQuery,
+  fetchResultsForQuery
 } from './helpers'
 import {
   initializeDatabase
 } from './config'
 require('./config')
 import mongoose from 'mongoose'
+import {store} from './store'
+const { dispatch } = store
 
 
-describe('rare caret database', () => {
+
+describe('rare carat database', () => {
   before(done => {
-    mongoose.connect(process.env.DATABASE_URL)
+    mongoose.connect(process.env.TEST_DATABASE_URL)
+    .then(() => {
+      let models = ['carat','rareCaratDiamond']
+      let promises = Promise.map(models, model => {
+        return mongoose.model(model).remove({})
+      return Promise.all(promises)
+      })
+    })
     .then(done)
     .catch(done)
   })
@@ -19,14 +30,14 @@ describe('rare caret database', () => {
     mongoose.disconnect().then(done)
   })
   it('should remove default carat', done => {
-    mongoose.model('caret')
+    mongoose.model('carat')
     .remove({})
     .then(() => done())
     .catch(done)
   })
-  it('should find rare caret diamonds ', done => {
+  it('should find rare carat diamonds ', done => {
     mongoose
-    .model('rareCaretDiamond')
+    .model('rareCaratDiamond')
     .find({})
     .then(res => {
       expect(res).to.be.an('array')
@@ -34,27 +45,35 @@ describe('rare caret database', () => {
       done()
     })
   })
-  it('should get main caret ', done => {
-    mongoose.model('caret').getMain()
+  it('should get main carat ', done => {
+    mongoose.model('carat').getMain()
     .then(res => {
-      console.log(res)
       expect(res.carat).to.be.a('number')
       expect(res.carat).to.eq(0.3)
       done()
     })
   })
-  it('should increment main caret ', done => {
-    mongoose.model('caret').increment(0.05)
+  it('should increment main carat ', done => {
+    mongoose.model('carat').increment(0.05)
     .then(res => {
-      console.log(res)
       expect(res.carat).to.be.a('number')
       expect(res.carat).to.eq(0.35)
       done()
     })
   })
+  it('should remove rare carat diamonds from mongo', done => {
+    mongoose
+    .model('rareCaratDiamond')
+    .remove({})
+    .then(res => {
+      expect(res).to.be.ok
+      done()
+    })
+
+  })
 
 })
-describe('rare caret scraper', () => {
+describe('rare carat scraper', () => {
   const filters = {
     "Index":0,
     "PageSize":50,
@@ -110,12 +129,21 @@ describe('rare caret scraper', () => {
     },
     "RequestNumber":1
   }
-  it('should return a new filters object with caret min value changed', done => {
+  it('should return a new filters object with carat min value changed', done => {
     let newFilters = Object.assign({}, filters, {Carats:{Min:0.20}})
     let {Carats:{Min}} = newFilters
     expect(Min).to.not.be.eq(filters.Carats.Min)
     console.log(filters.Carats.Min)
     console.log(newFilters.Carats.Min)
     done()
+  })
+  it('should fetch rarecaret diamonds for weight 0.31', done => {
+    postUserQuery(0.33)
+    .then(fetchResultsForQuery)
+    .then(res => {
+      expect(res).to.be.ok
+      console.log(res)
+      done()
+    })
   })
 })
