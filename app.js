@@ -1,122 +1,142 @@
-import csv from 'ya-csv'
-import {initializeDatabase, endCarat} from './config'
-import { expect } from 'chai'
-import {
-  getDiamondsFromRareCaret,
-  postUserQuery,
-  fetchResultsForQuery
-} from './helpers'
 
+import {
+  postUserQuery,
+  fetchResultsForQuery,
+  retryRequest
+} from './helpers'
+import {
+  writeHeadersToCsv,
+  openIdexJsonFile,
+  writeResultsToCsv,
+  isValid
+} from './utils'
 import {
   diamondsAddedRareCaret,
-  caratChanged
+  diamondsAddedIdex,
+  newUserQuery
 } from './actionCreators'
-
-import {
-  store
-} from './store'
-
-import mongoose from 'mongoose'
-
+import { store } from './store'
 
 const {getState, dispatch} = store
 
-const convertCsvToJson = (filename, csv) => {
-    return Promise.resolve(fs.createReadStream(csv)
-    .pipe(csv2json({
-      separator: ','
-    }))
-    .pipe(fs.createWriteStream(`${filename}.json`)))
-}
-const openIdexJsonFile = () => {
-  return new Promise(resolve => {
-    let json = require('./idex.json')
-    resolve(json)
+const startScraping = () => {
+  console.log('starting to scrape')
+  const {idexDiamonds} = getState()
+  Promise.map(idexDiamonds, diamond => {
+    return postUserQuery(idexDiamonds[0])
+    .then(key => dispatch(newUserQuery(key)))
   })
 }
 
-const writeResultsToCsv = (results) => {
-  return new Promise(resolve => {
-    let writer = csv.createCsvFileWriter('stats.csv', {'flags': 'a'});
-    writer.writeRecord(results)
-    resolve()
-  })
-}
-const start = () => {
-  let {carat, rareCaretDiamonds} = getState()
-  console.log(rareCaretDiamonds.length)
-  console.log(carat)
-  if(carat >= endCarat) {
-    console.log('finished fetching all diamonds from rarecaret')
-    console.log(rareCaretDiamonds.length)
-    return Promise.resolve('done')
-  }
-
-  return postUserQuery(carat)
-    .then(fetchResultsForQuery)
-    .then(results => {
-      return results
-        .filter(result => result.Success === true &&
-           result.Data.diamonds.length > 0)
-        .map(obj => {
-          writeResultsToCsv([
-            carat,
-            obj.Data.counts,
-            obj.url,
-            obj.Data.diamonds.length
-          ])
-          return obj.Data.diamonds
+const listenForStoreUpdates = () => {
+  console.log('listening for store updates')
+  return Promise.resolve(store.subscribe(() => {
+    let {lastAction} = getState()
+    switch(lastAction.type) {
+      case 'NEW_USER_QUERY':
+        return fetchResultsForQuery(lastAction.payload)
+        .then(results => {
+          let tryAgain = []
+          let resultsWithDiamonds = []
+          results.forEach(result => {
+            if(result !== undefined && result.Success === true && result.Data !== null) {
+              if(result.Data.counts > 0) {
+                resultsWithDiamonds.push(result)
+              }
+            }
+            else if(result.Success === false) {
+              tryAgain.push(result)
+            }
+          })
+          if(resultsWithDiamonds.length > 0) {
+            return dispatch(diamondsAddedRareCaret(resultsWithDiamonds))
+          }
         })
-        .reduce((a, b) => [...a, ...b])
-    })
-    .then(rareCaratDiamonds => {
-      console.log('found rare caret diamonds', rareCaratDiamonds.length)
-      return Promise.all(Promise.map(rareCaratDiamonds, rareCaratDiamond => {
-        let {Carat} = rareCaratDiamond
-        expect(Math.round(+Carat*100).toString()).to.eq(Math.round(+carat*100).toString())
-        return Promise.resolve(rareCaratDiamond)
-      }))
-      .then(() => dispatch(caratChanged()))
-      .then(() => dispatch(diamondsAddedRareCaret(rareCaratDiamonds)))
-      .then(start)
-    })
-    .catch(console.log)
-    
-    
-
-
-}
-const writeHeadersToCsv = () => {
-  let headers = ['currentWeight', 'theoreticalCount', 'site', 'trueCount']
-  let writer = csv.createCsvFileWriter('stats.csv', {'flags': 'a'});
-  writer.writeRecord(headers)
-  return Promise.resolve()
-}
-const syncReduxWithMongooseData = () => {
-  console.log('called')
-  return mongoose.model('carat').getMain()
-    .then(res => dispatch(caratChanged(+res.carat)))
+      case 'DIAMONDS_ADDED_RARECARET':
+        console.log('found rare caret diamonds', action.payload.length)
+      default:
+        return null
+    }
+  }))
 }
 
-const deleteMongoCollections = () => {
-  return Promise.all([
-    mongoose.model('carat').remove({}),
-    mongoose.model('rareCaratDiamond').remove({})
-  ])
+
+// const startIdexPromiseChain = (idexDiamond) => {
+//   console.log('called')
+//   let urlsRetried = []
+//   let worked = []
+//   let workedWithDiamonds = []
+//   let tryAgain = []
+//   return postUserQuery(idexDiamond)
+//     .then(fetchResultsForQuery)
+//     .then(initialResults => {
+
+//     })
+    // .then(rareCaratDiamonds => {
+    //   console.log('found rare caret diamonds', rareCaratDiamonds.length)
+    //   return Promise.all(Promise.map(rareCaratDiamonds, rareCaratDiamond => {
+    //     let {Carat} = rareCaratDiamond
+    //     return Promise.resolve(rareCaratDiamond)
+    //   }))
+    //   .then((rareCaretDiamonds) => console.log('rare caret diamonds that match idex diamond', rareCaretDiamonds.length))
+    // })
+    // .catch(console.log)
+// }
+
+const testIdexDiamond = { 'Item ID #': '90361590',
+  'Supplier Stock Ref': '498212',
+  Cut: 'Round',
+  Carat: '0.3',
+  Color: 'D',
+  'Natural Fancy Color': '',
+  'Natural Fancy Color Intensity': '',
+  'Natural Fancy Color Overtone': '',
+  'Treated Color': '',
+  Clarity: 'SI2',
+  'Make (Cut Grade)': 'Excellent',
+  'Grading Lab': 'GIA',
+  'Certificate Number': '2141241921',
+  'Certificate Path': 'http://DiamondTransactions.net/icp?di=90361590',
+  'Image Path': '',
+  'Online Report': '',
+  'Price Per Carat': '1235',
+  'Total Price': '370.50',
+  Polish: 'Very Good',
+  Symmetry: 'Very Good',
+  'Measurements (LengthxWidthxHeight)': '4.42x4.44x2.58',
+  Depth: '58.3',
+  Table: '61',
+  'Crown Height': '12.5',
+  'Pavilion Depth': '43',
+  'Girdle (From / To)': 'Medium',
+  'Culet Size': 'None',
+  'Culet Condition': '',
+  Graining: '',
+  'Fluorescence Intensity': 'None',
+  'Fluorescence Color': '',
+  Enhancement: '',
+  Supplier: 'Windiam',
+  Country: 'Belgium',
+  'State / Region': '',
+  Remarks: '',
+  Phone: '32-3-2266444',
+  'Pair Stock Ref.': '',
+  Email: 'katrien@windiam.net' }
+const syncIdexDiamondsWithStore = () => {
+  return openIdexJsonFile()
+  .filter(idexDiamond => isValid(idexDiamond) === true)
+  .then(idexDiamonds => dispatch(diamondsAddedIdex(idexDiamonds)))
 }
 
-const startFromScratch = () => {
-  console.log('starting from scratch')
-  return initializeDatabase()
-  .then(deleteMongoCollections)
-  .then(syncReduxWithMongooseData)
-  .then(writeHeadersToCsv)
-  .then(start)
-  .catch(console.log)
-}
+listenForStoreUpdates()
+.then(syncIdexDiamondsWithStore)
+.then(startScraping)
+.then(console.log)
 
-initializeDatabase()
-.then(syncReduxWithMongooseData)
-.then(start)
+
+
+
+
+
 
 

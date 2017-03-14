@@ -24,9 +24,14 @@
     "mocha": "^3.2.0",
     "mongoose": "^4.8.5",
     "redux": "^3.6.0",
+    "redux-actions": "^2.0.1",
+    "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
     "superagent": "^3.5.0",
     "superagent-bluebird-promise": "^4.1.0",
     "ya-csv": "^0.10.1"
+  },
+  "devDependencies": {
+    "redux-action-reducer": "^1.1.0"
   }
 }
