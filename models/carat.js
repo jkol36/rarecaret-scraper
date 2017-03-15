@@ -1,27 +1,26 @@
 import mongoose from 'mongoose'
-import { defaultCarat } from '../config'
 
-const caretSchema = mongoose.Schema({
+const countSchema = mongoose.Schema({
   id: Number,
-  carat: Number
+  count: Number
 })
 
-caretSchema.statics.getMain = function() {
+countSchema.statics.getMain = function() {
   return this.findOne({id:1})
           .then(res => {
             if(!!res) {
               return res
             }
-            return this.create({id:1, carat:defaultCarat}).then(this.save)
+            return this.create({id:1, count:0}).then(this.save)
           })
 }
 
-caretSchema.statics.increment = function(newVal) {
+countSchema.statics.increment = function() {
   return this.findOne({id:1})
-          .then(res => this.update({id:1, carat:res.carat+newVal}))
+          .then(res => this.update({id:1, count: res.count+1}))
           .then(this.save)
           .then(() => this.findOne({id:1}))
           .then(res => res)
 }
 
-export default mongoose.model('carat', caretSchema)
+export default mongoose.model('count', countSchema)

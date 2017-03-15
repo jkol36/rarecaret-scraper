@@ -67,15 +67,27 @@ const data = {
   },
   "RequestNumber":1
 }
-export const postUserQuery = (caret=0.15) => {
-  let filters = Object.assign({}, data, {Carats: {Min:caret, Max:caret}})
-  console.log(filters)
+// export const postUserQuery = (caret=0.15) => {
+//   let filters = Object.assign({}, data, {Carats: {Min:caret, Max:caret}})
+//   console.log(filters)
 
+//   return agent
+//           .post('https://www.rarecarat.com/Home/PostUserQuery')
+//           .set(headers)
+//           .send(filters)
+//           .then(res => res.body.Data)
+//           .catch(err => err)
+// }
+export const postUserQuery = (filter) => {
+  console.log('post user query called')
   return agent
           .post('https://www.rarecarat.com/Home/PostUserQuery')
           .set(headers)
-          .send(filters)
-          .then(res => res.body.Data)
+          .send(filter)
+          .then(res => {
+            return res.body.Data
+          })
+          .timeout(100000)
           .catch(err => err)
 }
 
@@ -107,8 +119,7 @@ export const fetchResultsForQuery = (key) => {
             .post(url)
             .set(headers)
             .then(res => {
-              let lengthOfDiamondArray = res.body.Data.diamonds.length
-              return {...res.body, url, lengthOfDiamondArray}
+              return {...res.body, url}
             })
             .catch(err => err)
   })

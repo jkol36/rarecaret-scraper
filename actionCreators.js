@@ -24,18 +24,38 @@ export const diamondsAddedRareCaret = (diamonds, carat) => dispatch => {
 
 }
 
-
-export const caratChanged = (carat) => dispatch => {
+export const diamondsAddedIdex = (diamonds) => dispatch => {
   return new Promise(resolve => {
-    mongoose.model('carat')
-      .increment(caratIncrement)
+    let promises = Promise.map(diamonds, diamond => {
+      return mongoose
+              .model('idexDiamond')
+              .create(diamond)
+              .then(res => res.save())
+              .catch(err => err)
+    })
+    Promise.all(promises).then(() => {
+        dispatch({
+        type: C.DIAMONDS_ADDED_IDEX,
+        diamonds
+      })
+      resolve(diamonds)
+    })
+    
+  })
+
+}
+
+export const countChanged = (count) => dispatch => {
+  return new Promise(resolve => {
+    mongoose.model('count')
+      .increment()
       .then(res => {
         console.log(res)
         dispatch({
-        type: C.CARAT_CHANGED,
-        carat: res.carat
+        type: C.COUNT_CHANGED,
+        carat: res.count
         })
-        resolve(res.carat)
+        resolve(res.count)
       })
   })
 }

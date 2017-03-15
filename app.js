@@ -1,4 +1,5 @@
-import csv from 'ya-csv'
+
+
 import {initializeDatabase, endCarat} from './config'
 import { expect } from 'chai'
 import {
@@ -15,43 +16,47 @@ import {
 import {
   store
 } from './store'
+import {
+  convertToCsv,
+  writeHeadersToCsv,
+  isValid,
+  convertCsvToJson,
+  openIdexJsonFile,
+  writeResultsToCsv,
+  buildFilter
+} from './utils'
 
 import mongoose from 'mongoose'
 
 
 const {getState, dispatch} = store
 
-const convertCsvToJson = (filename, csv) => {
-    return Promise.resolve(fs.createReadStream(csv)
-    .pipe(csv2json({
-      separator: ','
-    }))
-    .pipe(fs.createWriteStream(`${filename}.json`)))
-}
-const openIdexJsonFile = () => {
-  return new Promise(resolve => {
-    let json = require('./idex.json')
-    resolve(json)
-  })
-}
 
-const writeResultsToCsv = (results) => {
-  return new Promise(resolve => {
-    let writer = csv.createCsvFileWriter('stats.csv', {'flags': 'a'});
-    writer.writeRecord(results)
-    resolve()
-  })
-}
 const start = () => {
-  let {carat, rareCaretDiamonds} = getState()
-  console.log(rareCaretDiamonds.length)
-  console.log(carat)
-  if(carat >= endCarat) {
+  let {idexDiamonds, rareCaretDiamonds, count} = getState()
+  console.log(`rare caret length ${rareCaretDiamonds.length}, idex diamond length ${idexDiamonds.length}, current count ${count}`)
+  if(count >= idexDiamonds.length) {
     console.log('finished fetching all diamonds from rarecaret')
     console.log(rareCaretDiamonds.length)
     return Promise.resolve('done')
   }
+  const idexDiamond = idexDiamonds[count]
 
+  return buildFilter(idexDiamond)
+          .then(postUserQuery)
+          .delay(2000)
+          .then(fetchResultsForQuery)
+          .then(results => {
+            return results.filter(result => result.Success === true &&
+              result.Data.diamonds.length > 0)
+          })
+          .map(obj => obj.Data.diamonds)
+          .reduce((a, b) => [...a, ...b])
+          .all(rareCaretDiamonds => Promise.map(rareCaretDiamonds, rareCaretDiamond  => dispatch(diamondMatch(idexDiamond, rareCaretDiamond))))
+          .then(() => dispatch(countChanged()))
+          .then(start)
+}
+const oldStart = () => {
   return postUserQuery(carat)
     .then(fetchResultsForQuery)
     .then(results => {
@@ -81,17 +86,8 @@ const start = () => {
       .then(start)
     })
     .catch(console.log)
-    
-    
-
-
 }
-const writeHeadersToCsv = () => {
-  let headers = ['currentWeight', 'theoreticalCount', 'site', 'trueCount']
-  let writer = csv.createCsvFileWriter('stats.csv', {'flags': 'a'});
-  writer.writeRecord(headers)
-  return Promise.resolve()
-}
+
 const syncReduxWithMongooseData = () => {
   console.log('called')
   return mongoose.model('carat').getMain()
@@ -115,8 +111,27 @@ const startFromScratch = () => {
   .catch(console.log)
 }
 
-initializeDatabase()
-.then(syncReduxWithMongooseData)
-.then(start)
+
+
+
+
+openIdexJsonFile('new-idex')
+.all(idexDiamonds => idexDiamonds)
+.map(idexDiamond => dispatch(idexDiamondAdded(idexDiamond)))
+.then(() => {
+  console.log(getState().idexDiamonds)
+})
+
+//.reduce((a, b) => [...a, ...b])
+//.then(rareCaretDiamonds => {
+  //console.log('found rare caret diamonds', rareCaretDiamonds.length)
+//})
+// .map(buildFilter)
+// .map(postUserQuery)
+// .map(fetchResultsForQuery)
+
+// initializeDatabase()
+// .then(syncReduxWithMongooseData)
+// .then(start)
 
 
