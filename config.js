@@ -8,7 +8,3 @@ if(process.env.NODE_ENV != 'production')
 export const initializeDatabase = () => {
   return mongoose.connect(process.env.DATABASE_URL)
 }
-
-export const defaultCarat = 0.30
-export const caratIncrement = 0.01
-export const endCarat = 3.5

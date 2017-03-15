@@ -45,6 +45,23 @@ export const diamondsAddedIdex = (diamonds) => dispatch => {
 
 }
 
+export const diamondMatch = (idex, rarecaret) => dispatch => {
+  return mongoose.model('diamondMatches').create({
+    rareCaretDiamondUID: rarecaret.UID,
+    idexDiamondId: idex['Item ID']
+  }).then(res => res.save())
+  .then(() => {
+    dispatch({
+      type: C.DIAMOND_MATCH,
+      rarecaret,
+      idex
+    })
+  })
+  .catch(err => err)
+}
+
+
+
 export const countChanged = (count) => dispatch => {
   return new Promise(resolve => {
     mongoose.model('count')
@@ -53,7 +70,7 @@ export const countChanged = (count) => dispatch => {
         console.log(res)
         dispatch({
         type: C.COUNT_CHANGED,
-        carat: res.count
+        count: res.count
         })
         resolve(res.count)
       })

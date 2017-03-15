@@ -6,10 +6,14 @@ import {
 import thunk from 'redux-thunk'
 import {
   rareCaretDiamonds,
-  carat
+  idexDiamonds,
+  count,
+  diamondMatches
 } from './reducers'
 
 export const store = createStore(combineReducers({
   rareCaretDiamonds,
-  carat
+  idexDiamonds,
+  count,
+  diamondMatches
 }), applyMiddleware(thunk));

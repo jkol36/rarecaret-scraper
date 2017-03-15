@@ -10,7 +10,9 @@ import {
 
 import {
   diamondsAddedRareCaret,
-  caratChanged
+  diamondsAddedIdex,
+  diamondMatch,
+  countChanged
 } from './actionCreators'
 
 import {
@@ -33,28 +35,36 @@ const {getState, dispatch} = store
 
 
 const start = () => {
-  let {idexDiamonds, rareCaretDiamonds, count} = getState()
-  console.log(`rare caret length ${rareCaretDiamonds.length}, idex diamond length ${idexDiamonds.length}, current count ${count}`)
+  let {idexDiamonds, rareCaretDiamonds, count, diamondMatches} = getState()
+  console.log(`rare caret length ${rareCaretDiamonds.length}, diamond matches ${diamondMatches.length} idex diamond length ${idexDiamonds.length}, current count ${count}`)
   if(count >= idexDiamonds.length) {
     console.log('finished fetching all diamonds from rarecaret')
     console.log(rareCaretDiamonds.length)
     return Promise.resolve('done')
   }
   const idexDiamond = idexDiamonds[count]
-
-  return buildFilter(idexDiamond)
-          .then(postUserQuery)
+  const filter = buildFilter(idexDiamond)
+  return postUserQuery(filter)
           .delay(2000)
           .then(fetchResultsForQuery)
           .then(results => {
-            return results.filter(result => result.Success === true &&
-              result.Data.diamonds.length > 0)
+            let final = []
+            results.forEach(result => {
+              try {
+                final.push(result.Data.diamonds)
+              }
+              catch(err) {
+
+              }
+            })
+            return final
           })
-          .map(obj => obj.Data.diamonds)
-          .reduce((a, b) => [...a, ...b])
-          .all(rareCaretDiamonds => Promise.map(rareCaretDiamonds, rareCaretDiamond  => dispatch(diamondMatch(idexDiamond, rareCaretDiamond))))
+          .reduce((a,b) => [...a, ...b])
+          .map(rareCaretDiamond => dispatch(diamondMatch(idexDiamond, rareCaretDiamond)))
           .then(() => dispatch(countChanged()))
           .then(start)
+          .catch(console.log)
+
 }
 const oldStart = () => {
   return postUserQuery(carat)
@@ -114,13 +124,10 @@ const startFromScratch = () => {
 
 
 
-
-openIdexJsonFile('new-idex')
-.all(idexDiamonds => idexDiamonds)
-.map(idexDiamond => dispatch(idexDiamondAdded(idexDiamond)))
-.then(() => {
-  console.log(getState().idexDiamonds)
-})
+initializeDatabase()
+.then(() => openIdexJsonFile('new-idex'))
+.then(idexDiamonds => dispatch(diamondsAddedIdex(idexDiamonds)))
+.then(start)
 
 //.reduce((a, b) => [...a, ...b])
 //.then(rareCaretDiamonds => {

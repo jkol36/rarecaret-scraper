@@ -1,2 +1,4 @@
 require('./rareCaretDiamond')
-require('./carat')
+require('./count')
+require('./idexDiamond')
+require('./diamondMatch')

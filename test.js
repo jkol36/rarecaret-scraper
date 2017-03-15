@@ -7,17 +7,18 @@ import {
   initializeDatabase
 } from './config'
 require('./config')
+import {buildFilter} from './utils'
 import mongoose from 'mongoose'
 import {store} from './store'
 const { dispatch } = store
 
 
 
-describe('rare carat database', () => {
+describe('rare caret database', () => {
   before(done => {
     mongoose.connect(process.env.TEST_DATABASE_URL)
     .then(() => {
-      let models = ['carat','rareCaratDiamond']
+      let models = ['count','rareCaratDiamond', 'idexDiamond']
       let promises = Promise.map(models, model => {
         return mongoose.model(model).remove({})
       return Promise.all(promises)
@@ -29,13 +30,13 @@ describe('rare carat database', () => {
   after(done => {
     mongoose.disconnect().then(done)
   })
-  it('should remove default carat', done => {
-    mongoose.model('carat')
+  it('should remove default count', done => {
+    mongoose.model('count')
     .remove({})
     .then(() => done())
     .catch(done)
   })
-  it('should find rare carat diamonds ', done => {
+  it('should find rare count diamonds ', done => {
     mongoose
     .model('rareCaratDiamond')
     .find({})
@@ -45,23 +46,34 @@ describe('rare carat database', () => {
       done()
     })
   })
-  it('should get main carat ', done => {
-    mongoose.model('carat').getMain()
+  it('should find idex diamonds', done => {
+    mongoose
+    .model('idexDiamond')
+    .find({})
     .then(res => {
-      expect(res.carat).to.be.a('number')
-      expect(res.carat).to.eq(0.3)
+      expect(res).to.be.an('array')
+      expect(res.length).to.eq(0)
       done()
     })
   })
-  it('should increment main carat ', done => {
-    mongoose.model('carat').increment(0.05)
+  it('should get main count ', done => {
+    mongoose.model('count').getMain()
     .then(res => {
-      expect(res.carat).to.be.a('number')
-      expect(res.carat).to.eq(0.35)
+      expect(res.count).to.be.a('number')
+      expect(res.count).to.eq(0)
       done()
     })
   })
-  it('should remove rare carat diamonds from mongo', done => {
+  it('should increment main count ', done => {
+    mongoose.model('count').increment()
+    .then(res => {
+      expect(res.count).to.be.a('number')
+      expect(res.count).to.eq(1)
+      console.log(res.count)
+      done()
+    })
+  })
+  it('should remove rare caret diamonds from mongo', done => {
     mongoose
     .model('rareCaratDiamond')
     .remove({})
@@ -69,81 +81,44 @@ describe('rare carat database', () => {
       expect(res).to.be.ok
       done()
     })
-
+  })
+  it('should add an idex diamond', done => {
+    mongoose
+    .model('idexDiamond')
+    .create({name:'testing'})
+    .then(res => {
+      console.log(res)
+      expect(res).to.be.ok
+      done()
+    })
+  })
+  it('should find all idex diamonds', done => {
+    mongoose
+    .model('idexDiamond')
+    .find({})
+    .then(res => {
+      expect(res).to.be.ok
+      expect(res).to.be.an('array')
+      done()
+    })
   })
 
 })
-describe('rare carat scraper', () => {
-  const filters = {
-    "Index":0,
-    "PageSize":50,
-    "Sorting":"Price",
-    "Order":"asc",
-    "Shapes":"CU,AS,RA,HS,OV,PR,EC,MQ,PS,RD",
-    "Price":{
-      "Min":250,
-      "Max":2000000
-    },
-    "Cuts":{
-      "Min":1,
-      "Max":4
-    },
-    "Clarities":{
-      "Min":0,
-      "Max":8
-    },
-    "Carats":{
-      "Min":0.15,
-      "Max":15
-    },
-    "Colors":{
-      "Min":0,
-      "Max":8
-    },
-    "Certificate":{
-      "Certi":"4"
-    },
-    "Fluor":{
-      "Min":0,
-      "Max":5
-    },
-    "Tables":{
-      "Min":0,
-      "Max":100
-    },
-    "Depths":{
-      "Min":0,
-      "Max":100
-    },
-    "Polish":{
-      "Min":1,
-      "Max":4
-    },
-    "Symmetry":{
-      "Min":1,
-      "Max":4
-    },
-    "LWratio":{
-      "Min":0.5,
-      "Max":2.75
-    },
-    "RequestNumber":1
-  }
-  it('should return a new filters object with carat min value changed', done => {
-    let newFilters = Object.assign({}, filters, {Carats:{Min:0.20}})
-    let {Carats:{Min}} = newFilters
-    expect(Min).to.not.be.eq(filters.Carats.Min)
-    console.log(filters.Carats.Min)
-    console.log(newFilters.Carats.Min)
+describe('rare caret scraper', () => {
+  let idexDiamond = {"Item ID #":"118877724","Supplier Stock Ref":"CER024445","Cut":"Round","Carat":"0.5","Color":"I","Natural Fancy Color":"","Natural Fancy Color Intensity":"","Natural Fancy Color Overtone":"","Treated Color":"","Clarity":"SI1","Make (Cut Grade)":"Excellent","Grading Lab":"GIA","Certificate Number":"6241467581","Certificate Path":"http://DiamondTransactions.net/icp?di=118877724","Image Path":"","Online Report":"","Price Per Carat":"1575","Total Price":"787.5","Polish":"Excellent","Symmetry":"Very Good","Measurements (LengthxWidthxHeight)":"5.12x5.08x3.17","Depth":"62.2","Table":"58","Crown Height":"15","Pavilion Depth":"43.5","Girdle (From / To)":"Medium / Slightly Thick","Culet Size":"None","Culet Condition":"","Graining":"","Fluorescence Intensity":"None","Fluorescence Color":"","Enhancement":"","Supplier":"Y.D.I - Yoshfe Diamonds International Ltd","Country":"Israel","State / Region":"","Remarks":"","Phone":"-2276301","Pair Stock Ref.":"","Email":"motti.c@ydiltd.com","priceVariance":"0.8115345005","rareCaretPrice":"971","idexPrice":"787.5","% Diff":"18.90%"}
+  it('should build a filter for a idex diamond', done => {
+    let filter = buildFilter(idexDiamond)
+    expect(filter).to.be.an('object')
     done()
   })
-  it('should fetch rarecaret diamonds for weight 0.31', done => {
-    postUserQuery(0.33)
+  it('should fetch rarecaret diamonds for a filter', done => {
+    let filter = buildFilter(idexDiamond)
+    postUserQuery(filter)
     .then(fetchResultsForQuery)
-    .then(res => {
+    .map(res => {
       expect(res).to.be.ok
-      console.log(res)
-      done()
+      return res
     })
+    .then(() => done())
   })
 })
