@@ -122,7 +122,7 @@ const startFromScratch = () => {
 
 
 
-
+startFromScratch()
 
 
 
