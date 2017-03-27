@@ -1,5 +1,3 @@
-
-
 import {initializeDatabase, endCarat} from './config'
 import { expect } from 'chai'
 import {
