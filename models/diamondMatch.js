@@ -1,8 +1,7 @@
 import mongoose from 'mongoose'
 
-const diamondMatchSchema = mongoose.Schema({
-  rareCaretDiamondUID: String,
+const cheapestForIdex = mongoose.Schema({
   idexDiamondId: String
 })
 
-export default mongoose.model('diamondMatches', diamondMatchSchema)
+export default mongoose.model('cheapestForIdex', cheapestForIdexSchema)

@@ -16,7 +16,7 @@ countSchema.statics.getMain = function() {
 }
 
 countSchema.statics.increment = function() {
-  return this.findOne({id:1})
+  return this.getMain()
           .then(res => this.update({id:1, count: res.count+1}))
           .then(this.save)
           .then(() => this.findOne({id:1}))

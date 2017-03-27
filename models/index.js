@@ -1,4 +1,4 @@
 require('./rareCaretDiamond')
 require('./count')
 require('./idexDiamond')
-require('./diamondMatch')
+//require('./diamondMatch')

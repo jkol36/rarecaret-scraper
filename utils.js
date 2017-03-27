@@ -1,7 +1,7 @@
 import csv from 'ya-csv'
 import csv2json from 'csv2json'
 import fs from 'fs'
-const headersForCsv = ['idex diamond item id', 'theoreticalCount', 'site', 'trueCount']
+
 const allowableColors = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D']
 const symmetryLookup = {
     'Good': {
@@ -205,6 +205,27 @@ export const openIdexJsonFile = (filename) => {
   })
 }
 
+export const getUniqueIdexDiamonds = array => {
+  let idexLookup = {}
+  let unique = []
+  const findSimilar = item => {
+    return Object.keys(item).map(k => {
+      return array.filter(obj => obj[k] === obj[item[k]])
+    })
+
+  }
+  array.forEach(item => {
+
+    let idNum = item['Item ID #']
+    if(idexLookup[idNum] === undefined) {
+      idexLookup[idNum] = true
+      unique.push(item)
+    }
+  })
+  return unique
+
+}
+
 export const convertCsvToJson = (filename) => {
   fs.createReadStream(`${filename}.csv`)
   .pipe(csv2json({
@@ -214,17 +235,38 @@ export const convertCsvToJson = (filename) => {
   .pipe(fs.createWriteStream(`${filename}.json`));
 }
 
-export const writeResultsToCsv = (results) => {
+export const createCsvFileWriter = (file) => {
+  return csv.createCsvFileWriter(`${file}.csv`, {'flags': 'a'})
+}
+export const writeResultsToCsv = (results, csv) => {
   return new Promise(resolve => {
-    let writer = csv.createCsvFileWriter('stats.csv', {'flags': 'a'});
-    writer.writeRecord(results)
+    csv.writeRecord(results)
     resolve()
   })
 }
-export const writeHeadersToCsv = () => {
-  let writer = csv.createCsvFileWriter('stats.csv', {'flags': 'a'});
-  writer.writeRecord(headersForCsv)
-  return Promise.resolve()
+export const writeHeadersToCsv = (headers, csv) => {
+  csv.writeRecord(headers)
+  return Promise.resolve(200)
+}
+
+
+export const eliminateDuplicates = arr => {
+  var i,
+    len=arr.length,
+    out=[],
+    obj={};
+
+  for (i=0;i<len;i++) {
+    obj[arr[i]]=0;
+  }
+  for (i in obj) {
+    out.push(i);
+  }
+  return out;
+}
+
+export const removeFile = file => {
+  return Promise.resolve(fs.unlink(file))
 }
 export const buildFilter = (idexDiamond) => {
   return Object.assign({}, filters, {

@@ -1,0 +1,2 @@
+Gather a list of all unique combinations for all rarecaret diamonds.
+These are going to make up a rarecaret query.

@@ -7,7 +7,12 @@ import {
   initializeDatabase
 } from './config'
 require('./config')
-import {buildFilter} from './utils'
+import {
+  buildFilter,
+  removeFile,
+  writeHeadersToCsv,
+  createCsvFileWriter
+} from './utils'
 import mongoose from 'mongoose'
 import {store} from './store'
 const { dispatch } = store
@@ -121,4 +126,22 @@ describe('rare caret scraper', () => {
     })
     .then(() => done())
   })
+  it('should remove results.csv if it exists', done => {
+    removeFile('./results.csv')
+    .then(res => {
+      expect(res).to.be.ok
+      done()
+    })
+  })
+  it('should write headers to the csv', done => {
+    const headersForCsv = ['idex id', 'idex price', 'rare caret price', 'price variance', 'count', 'cheaper rare caret diamond', 'idex diamond']
+    const writer = createCsvFileWriter('test')
+    writeHeadersToCsv(headersForCsv, writer)
+    .then(res => {
+      expect(res).to.be.ok
+      done()
+    })
+  })
 })
+
+describe.only('utils')

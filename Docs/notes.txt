@@ -1,0 +1,59 @@
+Issues:
+  1. Cheerio isn't going to work in terms of being able to parse rarecaret because rarecaret is a Angular JS app. 
+  That means that a regular http request with superagent will just yield a skeleton html tree, when the real part of the html
+  tree is javascript injected at a later point in time. 
+
+  2. After doing initial research on osmosis i've found that osmosis is used as both a http library for making requests
+    and a parsing library for parsing the html when it is sent back. I wanted to seperate the parsing from the fetching if possible, 
+    mainly because osmosis is going to be put inside a function and a function is supposed to do just one thing. If it does to much and an error is thrown
+    in this case fetching a url and then parsing the html then its going to be harder to figure out which part of the business logic threw the error,
+    was it an error parsing or an error fetching?
+
+Possible Solutions:
+  1. Find a library that can wait for the javascript to load. A library that can query rarecaret as if it's a browser.
+    I think Osmosis can work like this, but it's been a while since i used it so need to play around with it and do some research
+    as well.
+
+  2. It might be possible to only use osmosis as a parsing library and abstract the fetching of the url away. But then again, if osmosis is supposed to 
+    act like a browser than it makes sense it would do both. So this isn't really a problem to begin with. Osmosis probably needs to make the request because it 
+    has logic that is more complex than just an http request, it mounts the javascript <script> tags it finds in the initial response
+
+So It turns out that my previous concerns are now mute. I dug deeper into how rare caret works and they do return json so no parsing of html is required. In fact, they actually query multiple sites on behalf of the user and return a collection of results from all the sites they have queried. The sites include:
+
+1. Yadav
+2. Allurez
+3. IDJewelery
+4. BrianGavin
+5. SolomonBrothers
+6. DiamondsDirect
+7. TaylorHart
+8. BrilliantlyEngaged
+9. WhiteFlash
+10. GoodOldGold
+11. Zales
+12. Ritani
+13. JamesAllen
+14. Kay
+15. Zoara
+16. Costco
+17. BlueNile
+18. HPDiamonds
+19. Jared
+20. UnionDiamond
+21. WonderJewelers
+
+2/27/17
+After talking to scott and Brett, it became clear that an initial search on rare caret with all filters set as leniently as possible was not returning back enough results. Specifically, rare caret was not sending back the number of diamonds they said they were. 
+
+About
+
+I'm sending an initial query to rarecaret. That initial query contains the same inputs that would be available on their website. Specifically I'm asking for a page size of 50, sorting should be based around price, the order of the results should be ascending (based on price) shapes I care about is just round, the price i want is between 250 and 2000000, the cuts i want is between 1 and 4, the clarities i want is between 0 and 8, the carats i want should be between 0.15 and the colors i want should be between 0 and 8. The Certificate i cask for is 4 and the fluir i ask for should be between 0 and 5, the tables i ask for should be between 0 and 100 and the depths i want should be between 0 and 100, the polish between 1 and 4 symmetry between 1 and 4 LWration between 0 and 5.
+
+Now when i post my query to rare caret, they assign me what's called an api key, they don't know the information i just asked for, they need to use the api key to ask other diamond sites for the diamonds i asked for. It would be as if, you ask me a question, I don't know the answer, but i know how to use google, so i google what you just asked me, read the first result, and report back to you with the first result. There are a million of different results for each search done on google, but i only have the first result, however that does not stop me from reading the total result number and saying hey, i found this on the first result but there were a total of 120K results. I think that may be what rare caret's doing. For each site, like yadav for instance, they say hey, we found 50 diamonds for you on yadav, but yadav has told us that there are a total of 120K diamonds. 
+
+Now at this point I have queried 10 different sites using my api key and have results for each site, some sites may return me no diamonds so i filter those out and don't care about them. At the end of it all, I flatten the results so that the results of each site (yadav, Allurez, etc) are all pushed into one array, I then store that array in a database. I can tell you that for each site the theretical results are much greater than the returned results.
+
+Now a solution may be to forget about rare caret all together and maybe scrape those sites individually, since it seems like they are the one with the actual diamonds. If there was away to use rare carat to get more results per site for a given query, i think rare caret would display that capability in the form of a pagination option, but it seems to me that they are restricted by yadav and the other sites they rely on when it comes to api calls.
+
+That sums up the querying, now when it comes to the comparison, it makes sense there would be so little results because if for each Carat i'm only receving 520 total results accross all sites (keep in mind that sometimes i may not receive anything) then with the carat alone there's only a maximum of 520 results so that's the dataset were looking at at each iteration. When you factor in everything else, the sample size just gets smaller.   
+

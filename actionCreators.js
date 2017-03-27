@@ -24,7 +24,19 @@ export const diamondsAddedRareCaret = (diamonds, carat) => dispatch => {
 
 }
 
+export const initialDiamondMatches = matchCollection => dispatch => {
+  return new Promise(resolve => {
+    let matches = []
+    matchCollection.forEach(match => matches.push(match._doc))
+    dispatch({
+      type: C.INITIAL_DIAMOND_MATCHES,
+      matches
+    })
+    resolve()
+  })
+}
 export const diamondsAddedIdex = (diamonds) => dispatch => {
+  console.log(`diamonds added idex ${diamonds.length}`)
   return new Promise(resolve => {
     let promises = Promise.map(diamonds, diamond => {
       return mongoose
@@ -45,14 +57,40 @@ export const diamondsAddedIdex = (diamonds) => dispatch => {
 
 }
 
+export const initialRareCaretDiamonds = (diamondCollection) => dispatch => {
+ return new Promise(resolve => {
+    let diamonds = []
+    diamondCollection.forEach(diamond => diamonds.push(diamond._doc))
+    dispatch({
+      type: C.INITIAL_DIAMONDS_RARECARET,
+      diamonds
+    })
+    resolve()
+  })
+}
+export const initialIdexDiamonds = (diamondCollection) => dispatch => {
+  return new Promise(resolve => {
+    let diamonds = []
+    diamondCollection.forEach(diamond => diamonds.push(diamond._doc))
+    dispatch({
+      type: C.INITIAL_DIAMONDS_IDEX,
+      diamonds
+    })
+    resolve()
+  })
+}
+
+
+
+
 export const diamondMatch = (idex, rarecaret) => dispatch => {
   return mongoose.model('diamondMatches').create({
     rareCaretDiamondUID: rarecaret.UID,
-    idexDiamondId: idex['Item ID']
+    idexDiamondId: idex['Item ID #']
   }).then(res => res.save())
   .then(() => {
     dispatch({
-      type: C.DIAMOND_MATCH,
+      type: C.NEW_MATCH,
       rarecaret,
       idex
     })
@@ -67,7 +105,7 @@ export const countChanged = (count) => dispatch => {
     mongoose.model('count')
       .increment()
       .then(res => {
-        console.log(res)
+        console.log(`count changed - new count:${count}`)
         dispatch({
         type: C.COUNT_CHANGED,
         count: res.count

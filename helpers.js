@@ -1,4 +1,5 @@
 import agent from 'superagent-bluebird-promise'
+import { expect } from 'chai'
 
 const headers = {
     'origin': 'https://www.rarecarat.com',
@@ -12,61 +13,7 @@ const headers = {
     'cookie': '__cfduid=dca43eba9e8043f0d80c57ca007008a9b1487951584; _ga=GA1.2.80667734.1487951588; G_ENABLED_IDPS=google; _hjIncludedInSample=1; intercom-id-pv5h34y3=ddc51a74-0dba-403f-a02a-dbcf14da30e4; _hp2_id.528151546=%7B%22userId%22%3A%222101328009977755%22%2C%22pageviewId%22%3A%224234254373627152%22%2C%22sessionId%22%3A%223184431706004176%22%2C%22identity%22%3Anull%2C%22trackerVersion%22%3A%223.0%22%7D'
 }
 
-const data = {
-  "Index":0,
-  "PageSize":100,
-  "Sorting":"Price",
-  "Order":"asc",
-  "Shapes":"RD",
-  "Price":{
-    "Min":250,
-    "Max":2000000
-  },
-  "Cuts":{
-    "Min":1,
-    "Max":4
-  },
-  "Clarities":{
-    "Min":0,
-    "Max":8
-  },
-  "Carats":{
-    "Min":0.15,
-    "Max":15
-  },
-  "Colors":{
-    "Min":0,
-    "Max":8
-  },
-  "Certificate":{
-    "Certi":"4"
-  },
-  "Fluor":{
-    "Min":0,
-    "Max":5
-  },
-  "Tables":{
-    "Min":0,
-    "Max":100
-  },
-  "Depths":{
-    "Min":0,
-    "Max":100
-  },
-  "Polish":{
-    "Min":1,
-    "Max":4
-  },
-  "Symmetry":{
-    "Min":1,
-    "Max":4
-  },
-  "LWratio":{
-    "Min":0.5,
-    "Max":2.75
-  },
-  "RequestNumber":1
-}
+
 // export const postUserQuery = (caret=0.15) => {
 //   let filters = Object.assign({}, data, {Carats: {Min:caret, Max:caret}})
 //   console.log(filters)
@@ -79,12 +26,13 @@ const data = {
 //           .catch(err => err)
 // }
 export const postUserQuery = (filter) => {
-  console.log('post user query called')
   return agent
           .post('https://www.rarecarat.com/Home/PostUserQuery')
           .set(headers)
           .send(filter)
           .then(res => {
+            expect(res.body.Data).to.not.be.undefined
+            expect(res.body.Data).to.not.be.null
             return res.body.Data
           })
           .timeout(100000)
@@ -123,6 +71,7 @@ export const fetchResultsForQuery = (key) => {
             })
             .catch(err => err)
   })
+  expect(promises).to.not.be.null
   return Promise.all(promises)
 }
 export const getAllDiamondsFromRareCaret = () => {
