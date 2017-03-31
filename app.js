@@ -1,3 +1,5 @@
+import _ from 'underscore'
+import deepEqual from 'deep-equal'
 import {initializeDatabase, endCarat} from './config'
 import { expect } from 'chai'
 import {
@@ -28,7 +30,8 @@ import {
   writeResultsToCsv,
   buildFilter,
   createCsvFileWriter,
-  removeFile
+  removeFile,
+  eliminateDuplicates
 } from './utils'
 
 import mongoose from 'mongoose'
@@ -119,8 +122,101 @@ const startFromScratch = () => {
 }
 
 
+//each idex diamond returned will have a unique set of properties.
+//the idea diamond has 7 properties, 
+//their needs to be a variation between those properties, 
+//so the fail count represents that variation. 
+//If I have a fail count of 6 then that means there was a variation of +1 between one of the varaibles
+const getUniqueIdex = () => {
+  return openIdexJsonFile('idex_diamonds')
+  .then(diamonds => {
+    let headers = Object.keys(diamonds[0])
+    let uniqueIdexWriter = createCsvFileWriter('uniqueIdex')
+    writeHeadersToCsv(headers, uniqueIdexWriter)
+    .then(() => {
+      let unique = []
+      let initialKeys = ['Color', 'Carat', 'Clarity', 'Polish', 'Symmetry']
+      let setLookup = {
+      'Color': new Set(),
+      'Carat': new Set(),
+      'Clarity': new Set(),
+      'Polish': new Set(),
+      'Symmetry': new Set(),
+      'Flouresc'
+      }
+      diamonds.forEach(diamond => {
+        let failCount = 0
+        initialKeys.forEach(k => {
+          if(setLookup[k].has(diamond[k])) {
+            failCount += 1
+          }
+          else {
+            setLookup[k].add(diamond[k])
+          }
+        })
+        console.log(setLookup)
+        if(failCount !== initialKeys.length) {
+          unique.push(diamond)
+        }
+      })
+      return Promise.all(Promise.map(unique, diamond => {
+        return writeResultsToCsv(Object.keys(diamond).map(k => diamond[k]), uniqueIdexWriter)
+      }))
+    })
+  })
+}
 
-startFromScratch()
+const stringify = obj => {
+  let allowableKeys = ['Color', 'Carat', 'Clarity', 'Polish', 'Symmetry', 'Fluorescence Intensity', 'Fluorescence Color']
+  return ''.concat(Object.keys(obj).map(k => {
+    if(allowableKeys.indexOf(k) !== -1)
+      return obj[k]
+  }))
+}
+
+
+// const parseForDuplicates = array => { 
+//   let final = new Set()
+//   array.sort((a, b) => {
+//     if(deepEqual(a, b) === false) {
+//       if(!final.has(a)) {
+//         final.add(a)
+//       }
+//       if(!final.has(b)) {
+//         final.add(b)
+//       }
+//     }
+//   })
+//   console.log(final.size)
+// }
+const testingSomething = () => {
+  return openIdexJsonFile('idex_diamonds')
+  .then(parseForDuplicates)
+}
+const getUniqueIdex2 = () => {
+  return openIdexJsonFile('idex_diamonds')
+  .then(diamonds => {
+    let headers = Object.keys(diamonds[0])
+    let uniqueIdexWriter = createCsvFileWriter('uniqueIdex')
+    writeHeadersToCsv(headers, uniqueIdexWriter)
+    .then(() => {
+      let uniqueStrings = new Set()
+      let unique = new Set()
+      diamonds.forEach(diamond => {
+        if(!uniqueStrings.has(stringify(diamond)) && !unique.has(diamond)) {
+          uniqueStrings.add(stringify(diamond))
+          unique.add(diamond)
+      }
+
+    })
+     return Promise.all(Promise.map(unique, diamond => {
+        return writeResultsToCsv(Object.keys(diamond).map(k => diamond[k]), uniqueIdexWriter)
+      }))
+  })
+  })
+}
+
+testingSomething()
 
 
 
