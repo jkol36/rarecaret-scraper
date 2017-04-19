@@ -5,6 +5,7 @@ require('./models')
 
 if(process.env.NODE_ENV != 'production')
   require('dotenv').load()
+const DATABASE_URL = 'mongodb://localhost/rarecaret_db'
 export const initializeDatabase = () => {
-  return mongoose.connect(process.env.DATABASE_URL)
+  return mongoose.connect(DATABSE_URL)
 }
