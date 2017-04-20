@@ -1,6 +1,7 @@
 import csv from 'ya-csv'
 import csv2json from 'csv2json'
 import fs from 'fs'
+Promise.promisifyAll(fs)
 
 const allowableColors = ['K', 'J', 'I', 'H', 'G', 'F', 'E', 'D']
 const symmetryLookup = {
@@ -268,7 +269,14 @@ export const eliminateDuplicates = arr => {
 }
 
 export const removeFile = file => {
-  return Promise.resolve(fs.unlink(file))
+  return fs.unlinkAsync(file)
+}
+export const addFile = file => {
+  console.log(typeof file)
+  return fs.linkAsync(file)
+}
+export const fileExists = file => {
+  return fs.existsSyncAsync(file)
 }
 export const buildFilter = (idexDiamond) => {
   return Object.assign({}, filters, {

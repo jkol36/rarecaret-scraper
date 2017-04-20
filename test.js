@@ -11,7 +11,9 @@ import {
   buildFilter,
   removeFile,
   writeHeadersToCsv,
-  createCsvFileWriter
+  createCsvFileWriter,
+  addFile,
+  fileExists
 } from './utils'
 import mongoose from 'mongoose'
 import {store} from './store'
@@ -126,12 +128,35 @@ describe('rare caret scraper', () => {
     })
     .then(() => done())
   })
+  it('should check to see if a file exists', done => {
+    fileExists('testing.csv')
+    .then(exists => {
+      console.log(`file exists? ${exists}`)
+      expect(exists).to.eq.false
+      done()
+    })
+    .catch(done)
+  })
+  it('should create a file', done => {
+    addFile('testing.csv')
+    .then(res => {
+      console.log('got res', res)
+      return fileExists('testing.csv')
+    })
+    .then(exists => {
+      console.log(exists)
+      expect(exists).to.eq.true
+      done()
+    })
+    .catch(done)
+  })
   it('should remove results.csv if it exists', done => {
     removeFile('./results.csv')
     .then(res => {
       expect(res).to.be.ok
       done()
     })
+    .catch(done)
   })
   it('should write headers to the csv', done => {
     const headersForCsv = ['idex id', 'idex price', 'rare caret price', 'price variance', 'count', 'cheaper rare caret diamond', 'idex diamond']
@@ -143,5 +168,3 @@ describe('rare caret scraper', () => {
     })
   })
 })
-
-describe.only('utils')

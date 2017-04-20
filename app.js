@@ -28,7 +28,8 @@ import {
   writeResultsToCsv,
   buildFilter,
   createCsvFileWriter,
-  removeFile
+  removeFile,
+  addFile
 } from './utils'
 
 import mongoose from 'mongoose'
@@ -111,6 +112,7 @@ const startFromScratch = () => {
   console.log('starting from scratch')
   return initializeDatabase()
   .then(() => removeFile(`${resultFileName}.csv`))
+  .then(() => addFile(`${resultFileName}.csv`))
   .then(() => writeHeadersToCsv(headersForCsv, writer))
   .then(deleteMongoCollections)
   .then(syncReduxWithMongooseData)
