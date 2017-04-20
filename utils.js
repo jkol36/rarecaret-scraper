@@ -190,7 +190,7 @@ const symmetryLookup = {
     },
     "RequestNumber":1
 }
-export const openIdexJsonFile = (filename) => {
+export const openIdexJsonFile = filename => {
   return new Promise(resolve => {
     var jsonFile = require('json-file-plus');
     var path = require('path'); // in node-core
@@ -226,7 +226,7 @@ export const getUniqueIdexDiamonds = array => {
 
 }
 
-export const convertCsvToJson = (filename) => {
+export const convertCsvToJson = filename => {
   fs.createReadStream(`${filename}.csv`)
   .pipe(csv2json({
     // Defaults to comma. 
@@ -235,7 +235,8 @@ export const convertCsvToJson = (filename) => {
   .pipe(fs.createWriteStream(`${filename}.json`));
 }
 
-export const createCsvFileWriter = (file) => {
+
+export const createCsvFileWriter = file => {
   return csv.createCsvFileWriter(`${file}.csv`, {'flags': 'a'})
 }
 export const writeResultsToCsv = (results, csv) => {
@@ -248,6 +249,7 @@ export const writeHeadersToCsv = (headers, csv) => {
   csv.writeRecord(headers)
   return Promise.resolve(200)
 }
+
 
 
 export const eliminateDuplicates = arr => {

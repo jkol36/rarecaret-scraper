@@ -1,5 +1,9 @@
-import agent from 'superagent-bluebird-promise'
+import agentPromise from 'superagent-bluebird-promise'
 import { expect } from 'chai'
+import proxyRequest from 'superagent-proxy'
+import proxies from './proxies'
+
+const agent = proxyRequest(agentPromise)
 
 const headers = {
     'origin': 'https://www.rarecarat.com',
@@ -26,8 +30,10 @@ const headers = {
 //           .catch(err => err)
 // }
 export const postUserQuery = (filter) => {
+  const proxy = proxies[Math.floor(Math.random()*proxies.length)]
   return agent
           .post('https://www.rarecarat.com/Home/PostUserQuery')
+          .proxy(proxy)
           .set(headers)
           .send(filter)
           .then(res => {
@@ -40,6 +46,7 @@ export const postUserQuery = (filter) => {
 }
 
 export const fetchResultsForQuery = (key) => {
+  const proxy = proxies[Math.floor(Math.random()*proxies.length)]
   const urls = [
     `https://www.rarecarat.com/Home/GetYadav/${key}`,
     `https://www.rarecarat.com/Home/GetAllurez/${key}`,
@@ -65,6 +72,7 @@ export const fetchResultsForQuery = (key) => {
   let promises = Promise.map(urls, url => {
     return agent
             .post(url)
+            .proxy(proxy)
             .set(headers)
             .then(res => {
               return {...res.body, url}

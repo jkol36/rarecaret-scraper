@@ -1,2 +1,2 @@
-Gather a list of all unique combinations for all rarecaret diamonds.
+Gather a list of all unique attribute combinations for all idex diamonds.
 These are going to make up a rarecaret query.

@@ -29,6 +29,7 @@
     "redux-thunk": "^2.2.0",
     "superagent": "^3.5.0",
     "superagent-bluebird-promise": "^4.1.0",
+    "superagent-proxy": "^1.0.2",
     "ya-csv": "^0.10.1"
   }
 }

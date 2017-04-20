@@ -69,6 +69,8 @@ const start = () => {
             let idexPrice = idexDiamond['Total Price']
             let rareCaretPrice = cheapestRareCaretDiamond.Price
             let priceVariance = Math.round(+idexPrice) / Math.round(+rareCaretPrice)
+            console.log(`found cheapest rare caret diamond price: ${cheapestRareCaretDiamond.price}`)
+            console.log(`idex price was ${idexPrice}`)
             return writeResultsToCsv([
               idexDiamond['Item ID #'],
               idexPrice, 
